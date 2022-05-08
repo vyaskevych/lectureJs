@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>JS Lecture 10</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+      <div class="slides">
+
+        <section>
+          <h1>JS Lecture </h1>
+          <p>Події Events</p>
+          <ul>
+            <li>Обробники (Handlers)</li>
+            <li>Розповсюдження (Propagation)</li>
+            <li>Делегування (Delegation)</li>
+            <li>Поширення події (Commonly used events)</li>
+          </ul>
+        </section>
+
+        <section>
+          <section>
+            <p>
+              Система обробки подій дозволяє реагувати на певні дії користувача (клацання, натискання клавіші) або  події браузера (завершено завантаження скрипту або зображення).
+            </p>
+          </section>
+          <section>
+            <p>
+              У наведених нижче прикладах буде використана подія "click", яка запускається після натискання та відпускання будь-якої кнопки миші над довільним елементом. Звичайно, існує набагато більше подій.
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Підключення обробників подій</h2>
+            <p>
+              Для використання системи подій, потрібно встановити обробники - функції "зворотного виклику", які будуть запускатися, коли виникає пов'язана подія.
+            </p>
+          </section>
+          <section>
+            <h3>Через атрибути</h3>
+            <p>
+              Вкажіть частину коду JS, яка буде запущена в спеціальному атрибуті тега. Ім'я атрибута задається наступним чином:
+            </p>
+            <p>
+              on + eventname
+            </p>
+            <ul>
+              <li>onclick</li>
+              <li>oninput</li>
+              <li>onfocus</li>
+              <li>...</li>
+            </ul>
+          </section>
+          <section>
+            <p>Потім заповніть значення атрибута довільним кодом JS</p>
+            <pre><code class="html" data-trim contenteditable>
+<button onclick="alert('Кнопка натиснута')">Click me</button>
+            </code></pre>
+            <button onclick="alert('Кнопка натиснута')">Click me</button>
+          </section>
+          <section>
+            <p>
+              Ви можете написати будь-який дійсний код JS: змінювати змінні, функції викликів тощо. Але вони повинні бути доступними в глобальному масштабі.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<script>
+  function buttonClick() {
+    alert('Кнопка натиснута');
+  }
+</script>
+<button onclick="buttonClick();">Click me</button>
+            </code></pre>
+            <script>
+              function buttonClick1() {
+                alert('Кнопка натиснута');
+              }
+            </script>
+            <button onclick="buttonClick1();">Click me!</button>
+          </section>
+          <section>
+            <p>
+              Контексту (this) присвоюється елемент, до якого прив'язаний обробник, але необхідно явно передати контекст, якщо викликається функція.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<script>
+  function showContents() {
+    alert(this.innerText);
+  }
+</script>
+<button onclick="alert(this.innerText);">Inline code</button>
+<button onclick="showContents.call(this);">Function call</button>
+            </code></pre>
+            <script>
+              function showContents() {
+                alert(this.innerText);
+              }
+            </script>
+            <button onclick="alert(this.innerText);">Inline code</button>
+            <button onclick="showContents.call(this);">Function call</button>
+          </section>
+          <section>
+            <p>
+              Ви можете програмно отримати доступ до атрибутів обробника, як і до будь-якого іншого атрибуту.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<button class="show-message">Click me</button>
+<button onclick="button.setAttribute('onclick', 'buttonClick();');">Set handler</button>
+<button onclick="button.removeAttribute('onclick');">Remove handler</button>
+<script>
+  var button = document.querySelector('.show-message');
+  function buttonClick() {
+    alert('Кнопка натиснута');
+  }
+</script>
+            </code></pre>
+            <div class="attribute-example">
+              <button class="show-message">Click me</button>
+              <button onclick="button.setAttribute('onclick', 'buttonClick();');">Set handler</button>
+              <button onclick="button.removeAttribute('onclick');">Remove handler</button>
+              <script>
+                var button = document.querySelector('.attribute-example .show-message');
+              </script>
+            </div>
+          </section>
+          <section>
+            <h3>Через властивості вузла</h3>
+            <p>
+              Як вже згадувалося, діючі атрибути відображаються у властивостях вузла, це також стосується обробників подій.
+            </p>
+          </section>
+          <section>
+            <p>
+              Зверніть увагу, що простий код JS в атрибуті автоматично завершується функцією, доступною як властивість.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<button onclick="alert(typeof this.onclick)">Click me</button>
+            </code></pre>
+            <button onclick="alert(typeof this.onclick)">Click me</button>
+          </section>
+          
+          <section>
+            <p>
+              Встановлення обробника через властивість або атрибут фактично перезаписує попередній обробник, якщо він присутній. Тому було введено зручний API.
+            </p>
+          </section>
+          <section>
+            <p>element.addEventListener(eventName, handlerFunction)</p>
+            <small>Зверніть увагу, що частина "on" не використовується для назви події</small>
+            <pre><code class="html" data-trim contenteditable>
+<button class="show-message">Click me</button>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+document.querySelector('.show-message').addEventListener('click', function() {
+  alert(this.innerText);
+});
+            </code></pre>
+            <div class="ael-first-example">
+              <button class="show-message">Click me</button>
+              <script>
+                document.querySelector('.ael-first-example .show-message').addEventListener('click', function() {
+                  alert(this.innerText);
+                });
+              </script>
+            </div>
+          </section>
+          <section>
+            <p>
+              element.removeEventListener(eventName, handlerFunction) -
+              використовується для видалення вже існуючого обробника.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<button class="show-message">Click me</button>
+<button class="set-handler">Set handler</button>
+<button class="remove-handler">Remove handler</button>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+function showContents() {
+  alert(this.innerText);
+}
+
+var button = document.querySelector('.show-message');
+document.querySelector('.set-handler').addEventListener('click', function() {
+  button.addEventListener('click', showContents);
+});
+document.querySelector('.remove-handler').addEventListener('click', function () {
+  button.removeEventListener('click', showContents);
+});
+            </code></pre>
+            <div class="el-add-remove-example">
+              <button class="show-message">Click me</button>
+              <button class="set-handler">Set handler</button>
+              <button class="remove-handler">Remove handler</button>
+              <script>
+                (function() {
+                  var root = document.querySelector('.el-add-remove-example');
+                  var button = root.querySelector('.show-message');
+
+                  root.querySelector('.set-handler').addEventListener('click', function() {
+                    button.addEventListener('click', showContents);
+                  });
+
+                  root.querySelector('.remove-handler').addEventListener('click', function () {
+                    button.removeEventListener('click', showContents);
+                  });
+                })();
+              </script>
+            </div>
+          </section>
+          <section>
+            <p>
+              .addEventListener або .removeEventListener не взаємодіє з атрибутами чи властивостями будь-яким способом.
+            </p>
+            <pre><code class="javascript" data-trim contenteditable>
+function showContents() {
+  alert(this.innerText);
+}
+
+var button = document.querySelector('.show-message');
+
+button.onclick = showContents;
+
+document.querySelector('.set-handler').addEventListener('click', function() {
+  button.addEventListener('click', showContents);
+});
+document.querySelector('.remove-handler').addEventListener('click', function () {
+  button.removeEventListener('click', showContents);
+});
+            </code></pre>
+            <div class="el-with-properties-example">
+              <button class="show-message">Click me</button>
+              <button class="set-handler">Set handler</button>
+              <button class="remove-handler">Remove handler</button>
+              <script>
+                (function() {
+                  var root = document.querySelector('.el-with-properties-example');
+                  var button = root.querySelector('.show-message');
+
+                  button.onclick = showContents;
+
+                  root.querySelector('.set-handler').addEventListener('click', function() {
+                    button.addEventListener('click', showContents);
+                  });
+
+                  root.querySelector('.remove-handler').addEventListener('click', function () {
+                    button.removeEventListener('click', showContents);
+                  });
+                })();
+              </script>
+            </div>
+          </section>
+          
+          
+        </section>
+
+        <section>
+          <section>
+            <h2>Об'єкт події</h2>
+            <p>
+              Кожна подія генерує об'єкт, який представляє цю подію, і містить корисні дані і методи. Деякі властивості спільні для різних подій, а деякі - конкретні.
+            </p>
+          </section>
+          <section>
+            <p>
+              Об'єкт події передається як перший аргумент функції обробника і доступний незалежно від того, як ви фактично встановлюєте обробник.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<button onclick="alert([event.type, event.clientX, event.clientY].join(' '))">Attribute</button>
+<button class="show-message">addEventListener</button>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+var button = document.querySelector('.show-message');
+  
+button.addEventListener('click', function(event) {
+  alert([event.type, event.clientX, event.clientY].join(' '));
+});
+            </code></pre>
+            <div class="event-object-example">
+              <button onclick="alert([event.type, event.clientX, event.clientY].join(' '))">Attribute</button>
+              <button class="show-message">addEventListener</button>
+              <script>
+                (function() {
+                  var button = document.querySelector('.event-object-example .show-message');
+
+                  button.addEventListener('click', function(event) {
+                    alert([event.type, event.clientX, event.clientY].join(' '));
+                  });
+                })();
+              </script>
+            </div>
+          </section>
+          
+        </section>
+
+        <section>
+          <section>
+            <h2>Розповсюдження подій</h2>
+            <small>Потік подій</small>
+            <p>
+              Більшість подій поширюються через дерево DOM, тобто. Натискання на дочірній елемент також запускає обробник кліків батьків.
+            </p>
+          </section>
+          <section>
+            <pre><code class="html" data-trim contenteditable>
+<div onclick="alert('div');" style="border: 2px solid blue">
+  <button onclick="alert('button');">Click me</button>
+</div>
+            </code></pre>
+            <div onclick="alert('div');" style="border: 2px solid blue">
+              <button onclick="alert('button');">Click me</button>
+            </div>
+          </section>
+          <section>
+            <p>
+              Поширення подій складається з трьох стадій, як зазначено в W3C:
+            </p>
+            <ul>
+              <li>Фаза захоплення (тунелювання) - подія переходить від кореневого документа до елемента цілі</li>
+              <li>Цільова фаза - подія досягнула цільового елемента</li>
+              <li>Фаза Bubbling - подія переходить від цільового елемента до кореня документа</li>
+            </ul>
+          </section>
+          <section>
+            <img class="stretch" src="img/eventflow.svg" alt="Event propagation">
+          </section>
+          <section>
+            <p>Тут пов'язані event.target і event.currentTarget</p>
+            <ul>
+              <li>.target - початковий елемент, на якому подія була викликана</li>
+              <li>.currentTarget - елемент, на якому зараз подія оброблюється</li>
+            </ul>
+          </section>
+          <!--
+          <section>
+            <p>
+              Наступні приклади використовуватимуть цю функцію:
+            </p>
+            <ul>
+              <li>.target підсвічується темно</li>
+              <li>.currentTarget межує червоним кольором</li>
+            </ul>
+            <pre><code class="javascript" data-trim contenteditable>
+function alertTarget(event) {
+  event.target.style.background = 'darkred';
+  event.currentTarget.style.border = '1px solid red';
+  alert(
+    'Target: ' + event.target.tagName +
+    ' Current target: ' + event.currentTarget.tagName
+  );
+  event.target.style.background = '';
+  event.currentTarget.style.border = '';
+}
+            </code></pre>
+          </section>
+        -->
+          <section>
+            <p>Для кожного елементу встановлено один і той же обробник, спробуйте натиснути на них</p>
+            <pre><code class="html" data-trim contenteditable>
+<div>
+  Wrapper
+  <p>
+    Paragraph
+    <br>
+    <button>Button</button>
+  </p>
+</div>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+Array.prototype.forEach.call(document.querySelectorAll('*'), function(element) {
+  element.addEventListener('click', alertTarget);
+});
+            </code></pre>
+            <div class="target-example">
+              <div>
+                Wrapper
+                <p>
+                  Paragraph
+                  <br>
+                  <button>Button</button>
+                </p>
+              </div>
+            </div>
+            <script>
+              function alertTarget(event) {
+                event.target.style.background = 'darkred';
+                event.currentTarget.style.border = '1px solid red';
+                alert(
+                  'Target: ' + event.target.tagName +
+                  ' Current target: ' + event.currentTarget.tagName
+                );
+                event.target.style.background = '';
+                event.currentTarget.style.border = '';
+              }
+
+              Array.prototype.forEach.call(document.querySelectorAll('.target-example *'), function(element) {
+                element.addEventListener('click', alertTarget);
+              });
+            </script>
+          </section>
+          <section>
+            <p>
+              Події обробляються на етапі вспливання: спочатку обробник спрацьовує на елементі-цілі, а потім на батьківському елементі, і далі по дереву DOM.
+            </p>
+          </section>
+          <section>
+            <p>
+              Однак .addEventListener має необов'язковий третій аргумент, який контролює, на якому етапі буде оброблятися подія.
+            </p>
+            <ul>
+              <li>.addEventListener(eventName, handler, false) - на етапі спливання (by default)</li>
+              <li>.addEventListener(eventName, handler, true) - на етапі перехоплення</li>
+            </ul>
+          </section>
+          <section>
+            <p>
+              Вам рідко потрібно щось інше, ніж спливання, але зауважте, що деякі події не спливають і можуть бути перехоплені лише під час тунелювання. Обов'язково прочитайте документи.
+            </p>
+          </section>
+          <section>
+            <p>
+              Тепер обробники подій будуть запускатися під час фази захоплення: по-перше, верхній батьківський елемент, а потім далі до цільового елемента
+            </p>
+            <pre><code class="javascript" data-trim contenteditable>
+Array.prototype.forEach.call(document.querySelectorAll('*'), function(element) {
+  // Note the false as third argument
+  element.addEventListener('click', alertTarget, true);
+});
+            </code></pre>
+            <div class="target-capture-example">
+              <div>
+                Wrapper
+                <p>
+                  Paragraph
+                  <br>
+                  <button>Button</button>
+                </p>
+              </div>
+            </div>
+            <script>
+              Array.prototype.forEach.call(document.querySelectorAll('.target-capture-example *'), function(element) {
+                element.addEventListener('click', alertTarget, true);
+              });
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Взаємодія з подіями</h2>
+            <p>
+              Використовуючи об'єкт події, ви можете запобігти подальшому поширенню або змінювати поведінку за замовчуванням (н-д запобігти подачі форми).
+            </p>
+          </section>
+          <section>
+            <p>
+              Припинення розповсюдження означає, що ніякі обробники після поточного не спрацюють для поточної події. Якщо ви зупините поширення під час захоплення, воно взагалі не досягне стадії всплиття.
+            </p>
+            <ul>
+              <li>event.stopPropagation()</li>
+              <li>event.stopImmediatePropagation() - також запобігає виклику обробників поточного елемента</li>
+            </ul>
+          </section>
+          <section>
+            <pre><code class="html" data-trim contenteditable>
+<div class="wrapper" onclick="alert('div');">
+  <button onclick="alert('button');">Normal flow</button>
+  <button onclick="alert('button'); event.stopPropagation();">Propagation prevented</button>
+</div>
+            </code></pre>
+            <div class="wrapper" onclick="alert('div');">
+              <button onclick="alert('button');">Normal flow</button>
+              <button onclick="alert('button'); event.stopPropagation();">Propagation prevented</button>
+            </div>
+          </section>
+          <section>
+            <p>
+              <strong>Не припиняйте розповсюдження, якщо у вас немає серйозних підстав для цього.</strong>Інший код може залежати від подій, що виникають, наприклад такі як аналітика Google тощо.
+            </p>
+          </section>
+          <section>
+            <h3>Запобігання або зміна поведінки за замовчуванням</h3>
+            <p>
+              Поведінка за замовчуванням - це набір дій, які браузер виконує, коли відбуваються певні події. <em>Наприклад:</em>
+            </p>
+            <ul>
+              <li>Навігація, коли користувач натискає &lt;a href="..."&gt;</li>
+              <li>Надсилання форми, коли &lt;input type = "submit"&gt; натискається</li>
+              <li>Оновлення текстового значення вводу, коли користувач натискає кнопку</li>
+              <li>…</li>
+            </ul>
+          </section>
+          <section>
+            <p>
+              event.preventDefault() змушує браузер не приймати дію за замовчуванням. Це може бути використане для перевірки форми перед подачею, для правильної навігації <acronym title="Single Page Application">SPA</acronym>s та багато іншого.
+            </p>
+          </section>
+          <section>
+            <p>
+              Наприклад, наступні посилання вказують на попередній слайд, однак у одній з них є попереджувальний обробник поведінки за замовчуванням.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<a href="#/5/5">Ordinary link</a>
+<br>
+<a href="#/5/5" onclick="event.preventDefault();">Prevent default</a>
+            </code></pre>
+            <a href="#/5/5">Ordinary link</a>
+            <br>
+            <a href="#/5/5" onclick="event.preventDefault(); alert('Oops');">Prevent default</a>
+          </section>
+          <!--<section class="beforeunload">
+            <p>
+              Деякі події підтримують зміну поведінки за замовчуванням. Це в основному здійснюється шляхом повернення значення з обробника. Наприклад, повернення текстового рядка з обробника подій onbeforeunload призведе до швидкого відображення.
+            </p>
+            <pre><code class="javascript" data-trim contenteditable>
+function beforeUnload(event) {
+  return 'Do you really want to quit?';
+}
+
+window.onbeforeunload = beforeUnload;
+            </code></pre>
+            <a href="http://google.com">Try going to google.com</a>
+          </section>-->
+          <section>
+            <p>IE8 особливості</p>
+            <table>
+              <tr>
+                <td>Modern Browsers</td>
+                <td>IE8</td>
+              </tr>
+              <tr>
+                <td>event.currentTarget</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>event.stopPropagation()</td>
+                <td>event.cancelBubble = true</td>
+              </tr>
+              <tr>
+                <td>event.preventDefault()</td>
+                <td>event.returnValue = false</td>
+              </tr>
+            </table>
+            <p>Деякі події не підтримуються, розгляньте можливість використання polyfill</p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Делегування подій</h2>
+            <p>
+              Поширення подій дозволяє обробляти дочірні події в батьківському обробнику. Тому, рекомендується, встановити один обробник для батьківського елементу, а не керувати багатьма обробниками для кожного з його нащадків.
+            </p>
+          </section>
+          <section>
+            <p>Деякі випадки, коли делегування подій буде найкращим вибором:</p>
+            <ul>
+              <li>Багато дочірніх елементів, які мають однакову поведінку</li>
+              <li>
+                Дочірні елементи вставляються або видаляються під час виконання - при делегування подій не потрібно керувати обробниками для кожної окремої дитини.
+              </li>
+            </ul>
+          </section>
+          <section>
+            <p>Основний підхід до делегування подій:</p>
+            <ul>
+              <li>Обробник встановлюється на найближчому батьківському елементі, щоб уникнути безладу і недосяжного коду</li>
+              <li>Усередині обробника перевіряється, чи є цільовий елемент (event.target) необхідним елементом.</li>
+              <li>Обробка події</li>
+            </ul>
+          </section>
+          <section>
+            <pre><code class="html" data-trim contenteditable>
+<button>Add Item</button>
+<br>
+<ul>
+  <li>Item</li>
+</ul>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+var ul = document.querySelector('ul');
+ul.addEventListener('click', function(event) {
+  ul.removeChild(event.target);
+});
+
+var counter = 0;
+document.querySelector('button').addEventListener('click', function(event) {
+  var newLi = document.createElement('li');
+  newLi.innerHTML = 'Item ' + ++counter;
+  ul.appendChild(newLi);
+});
+            </code></pre>
+          </section>
+          <section>
+            <div class="list-delegation-example">
+              <button>Add Item</button>
+              <br>
+              <ul>
+                <li>Item</li>
+              </ul>
+            </div>
+            <script>
+              (function() {
+                var ul = document.querySelector('.list-delegation-example ul');
+
+                ul.addEventListener('click', function(event) {
+                  ul.removeChild(event.target);
+                });
+
+                var counter = 0;
+                document.querySelector('.list-delegation-example button').addEventListener('click', function(event) {
+                  var newLi = document.createElement('li');
+                  newLi.innerHTML = 'Item ' + ++counter;
+                  ul.appendChild(newLi);
+                });
+              })();
+            </script>
+          </section>
+          <section>
+            <p>
+              Під час обробки делегованих подій вам часто потрібно відфільтрувати певні елементи.
+            </p>
+            <pre><code class="html" data-trim contenteditable>
+<button>Add Item</button>
+<br>
+<ul>
+  <li class="not-deletable">Not deletable li</li>
+</ul>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+var ul = document.querySelector('ul');
+ul.addEventListener('click', function(event) {
+  if(!event.target.matches('.not-deletable')) {
+    ul.removeChild(event.target);
+  }
+});
+
+var counter = 0;
+document.querySelector('button').addEventListener('click', function(event) {
+  var newLi = document.createElement('li');
+  newLi.innerHTML = 'Item ' + ++counter;
+  ul.appendChild(newLi);
+});
+            </code></pre>
+          </section>
+          <section>
+            <div class="list-filtering-example">
+              <button>Add Item</button>
+              <br>
+              <ul>
+                <li class="not-deletable">Not deletable li</li>
+              </ul>
+            </div>
+            <script>
+              (function(){
+                var ul = document.querySelector('.list-filtering-example ul');
+
+                ul.addEventListener('click', function(event) {
+                  if(!event.target.matches('.not-deletable')) {
+                    ul.removeChild(event.target);
+                  }
+                });
+
+                var counter = 0;
+                document.querySelector('.list-filtering-example button').addEventListener('click', function(event) {
+                  var newLi = document.createElement('li');
+                  newLi.innerHTML = 'Item ' + ++counter;
+                  ul.appendChild(newLi);
+                });
+              })();
+            </script>
+          </section>
+          <section>
+            <p>І ви можете розв'язати деякі складні випадки в меншій кількості рядків коду.</p>
+            <pre><code style="max-height: 200px" class="html" data-trim contenteditable>
+<div class="nested-wrapper">
+  <ul>
+    <li>Item 1-1</li>
+    <li>Item 1-2</li>
+    <ul>
+      <li>Item 2-1</li>
+      <li>Item 2-2</li>
+      <ul>
+        <li>Item 3-1</li>
+        <li>Item 3-2</li>
+      </ul>
+    </ul>
+    <li>Item 1-3</li>
+  </ul>
+</div>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+var wrapper = document.querySelector('.nested-wrapper');
+wrapper.addEventListener('click', function(event) {
+  if (event.target.tagName == 'LI') {
+    var parent = event.target.parentElement;
+
+    event.target.remove();
+
+    if (parent.children.length == 0) {
+      parent.remove();
+    }
+  }
+});
+            </code></pre>
+          </section>
+          <section>
+            <div class="list-complex-example">
+              <div class="nested-wrapper">
+                <ul>
+                  <li>Item 1-1</li>
+                  <li>Item 1-2</li>
+                  <ul>
+                    <li>Item 2-1</li>
+                    <li>Item 2-2</li>
+                    <ul>
+                      <li>Item 3-1</li>
+                      <li>Item 3-2</li>
+                    </ul>
+                  </ul>
+                  <li>Item 1-3</li>
+                </ul>
+              </div>
+            </div>
+            <script>
+              (function(){
+                var wrapper = document.querySelector('.list-complex-example .nested-wrapper');
+                wrapper.addEventListener('click', function(event) {
+                  if (event.target.tagName == 'LI') {
+                    var parent = event.target.parentElement;
+
+                    event.target.remove();
+
+                    if (parent.children.length == 0) {
+                      parent.remove();
+                    }
+                  }
+                });
+              })();
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Деякі часто використовувані події</h3>
+          </section>
+          <section>
+            <p>document.addEventListener('DOMContentLoaded', ...) - запускається при створенні дерева DOM.</p>
+            <p>Дерево DOM ще може бути не побудоване під час виконання сценаріїв:</p>
+            <pre><code class="html" data-trim contenteditable>
+&lt;head&gt;
+  <script>
+    console.log(document.getElementById('target')); // => null
+  </script>
+&lt;/head&gt;
+&lt;body&gt;
+  <div id="target">Content</div>
+&lt;/body&gt;
+            </code></pre>
+          </section>
+          <section>
+            <p>The solution:</p>
+            <pre><code class="html" data-trim contenteditable>
+&lt;head&gt;
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log(document.getElementById('target').innerHTML); // => 'Content'
+    });
+  </script>
+&lt;/head&gt;
+&lt;body&gt;
+  <div id="target">Content</div>
+&lt;/body&gt;
+            </code></pre>
+          </section>
+          <section>
+            <p>
+              Хороша практика завжди згортати ваші скрипти в обробник подій DOMContentLoaded, якщо вони будь-яким чином звертаються до DOM.
+            </p>
+          </section>
+          <section>
+            <p>window.addEventListener('load', ...) - викликається, коли будується DOM дерево і всі ресурси (зображення, IFrames) завершили завантаження</p>
+            <p>Іноді потрібно зачекати, поки завантажаться всі зображення та буде визначений їх розмір.</p>
+          </section>
+          <section>
+            <p>element.addEventListener('load', ...) - запускається, коли певний елемент (скрипт, зображення, iframe) завершує завантаження</p>
+            <p>element.addEventListener('error', ...) - запускається, коли не вдається завантажити певний елемент (скрипт, зображення, iframe)</p>
+          </section>
+          <section>
+            <ul>
+              <li>element.addEventListener('focus', ...) - елемент отримує фокус</li>
+              <li>element.addEventListener('blur', ...) - елемент втрачає фокус</li>
+              <li>element.addEventListener('change', ...) - як втрата фокусу, але тільки якщо значення елемента змінилося</li>
+              <li>element.addEventListener('input', ...) - значення елемента змінилося (подія натискання клавіші не запускається, коли взаємодія виконуються через контекстне меню)</li>
+            </ul>
+          </section>
+          <section>
+            <div class="input-events-example">
+              <input type="text">
+              <p></p>
+            </div>
+            <script>
+              (function() {
+                var input = document.querySelector('.input-events-example input');
+                var p = document.querySelector('.input-events-example p');
+                input.addEventListener('focus', function() { p.innerHTML = 'focus'; });
+                input.addEventListener('blur', function() { p.innerHTML = p.innerHTML == 'change' ? 'change + blur' : 'blur'; });
+                input.addEventListener('change', function() { p.innerHTML = 'change'; });
+                input.addEventListener('input', function() { p.innerHTML = 'input'; });
+              })();
+            </script>
+          </section>
+          <section>
+            <p>form.addEventListener('submit', ...)</p>
+            <pre><code class="html" data-trim contenteditable>
+<form action="#">
+  <input type="text" name="firstName">
+  <input type="text" name="lastName">
+  <input type="text" name="address">
+  <input type="submit">
+</form>
+            </code></pre>
+            <pre><code class="javascript" data-trim contenteditable>
+form.addEventListener('submit', function(event) {
+  var inputObject = {};
+  Array.prototype.forEach.call(form.querySelectorAll('input[type="text"]'), function(el) {
+    inputObject[el.getAttribute('name')] = el.value;
+  });
+
+  // validate it here
+  console.log(inputObject);
+
+  if(!Validator.isValid(inputObject)) {
+    event.preventDefault();
+  }
+});
+            </code></pre>
+          </section>
+          <section>
+            <div class="form-submit-example">
+              <form action="#">
+                <input type="text" name="firstName">
+                <input type="text" name="lastName">
+                <input type="text" name="address">
+                <input type="submit">
+              </form>
+            </div>
+            <script>
+            (function() {
+              var form = document.querySelector('.form-submit-example form');
+              form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                var inputObject = {};
+                Array.prototype.forEach.call(form.querySelectorAll('input[type="text"]'), function(el) {
+                  inputObject[el.getAttribute('name')] = el.value;
+                });
+
+                console.log(inputObject);
+              });
+            })();
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Throttle</h3>
+            <p>
+              Деякі події (scroll, mousemove) запускаються так само швидко, як браузер може це зробити. І, більшу частину часу, вам не потрібні обробники, щоб їх часто викликали. Таким чином, обмеження швидкості (дроселювання) викликів стає важливим.
+            </p>
+          </section>
+          <section>
+            <p>Дроселювання функції змушує її викликатися тільки один раз протягом N секунд</p>
+            <pre><code class="javascript" data-trim contenteditable>
+function throttle(fn, threshhold, scope) {
+  threshhold || (threshhold = 250);
+  var last,
+      deferTimer;
+  return function () {
+    var context = scope || this;
+
+    var now = +new Date,
+        args = arguments;
+    if (last && now < last + threshhold) {
+      // hold on to it
+      clearTimeout(deferTimer);
+      deferTimer = setTimeout(function () {
+        last = now;
+        fn.apply(context, args);
+      }, threshhold);
+    } else {
+      last = now;
+      fn.apply(context, args);
+    }
+  };
+}
+            </code></pre>
+          </section>
+          <section>
+            <p>Відкрийте консоль і перемістіть курсор миші над елементами</p>
+            <div class="throttle-example">
+              <div class="default">
+                Unthrottled
+              </div>
+              <div class="throttle">
+                Throttled
+              </div>
+            </div>
+            <pre><code class="javascript" data-trim contenteditable>
+function mouseMove(event) {
+  console.log(event.clientX, event.clientY);
+}
+
+document.querySelector('.default')
+  .addEventListener('mousemove', mouseMove);
+
+document.querySelector('.throttle')
+  .addEventListener('mousemove', throttle(mouseMove, 100));
+            </code></pre>
+            <style>
+              .throttle-example {
+                display: inline-block;
+                margin: 0 auto;
+              }
+
+              .throttle-example div {
+                width: 200px;
+                height: 200px;
+                float: left;
+                background: darkred;
+                text-align: center;
+                margin-right: 10px;
+              }
+            </style>
+            <script>
+              (function() {
+                var root = document.querySelector('.throttle-example');
+
+                function mouseMove(event) {
+                  console.log(event.clientX, event.clientY);
+                }
+
+                root.querySelector('.default')
+                  .addEventListener('mousemove', mouseMove);
+
+                root.querySelector('.throttle')
+                  .addEventListener('mousemove', throttle(mouseMove, 500));
+
+                // ---
+
+                function throttle(fn, threshhold, scope) {
+                  threshhold || (threshhold = 250);
+                  var last,
+                      deferTimer;
+                  return function () {
+                    var context = scope || this;
+
+                    var now = +new Date,
+                        args = arguments;
+                    if (last && now < last + threshhold) {
+                      // hold on to it
+                      clearTimeout(deferTimer);
+                      deferTimer = setTimeout(function () {
+                        last = now;
+                        fn.apply(context, args);
+                      }, threshhold);
+                    } else {
+                      last = now;
+                      fn.apply(context, args);
+                    }
+                  };
+                }
+              })();
+            </script>
+          </section>
+          <section>
+            <h3>Усунення перешкод Debouncing</h3>
+            <p>
+              У деяких подій є можливість виконуватися швидко і багато разів поспіль (наприклад, «mousemove» і «scroll»). При обробці таких подій треба бути обережним і не робити нічого «важкого», або ваш обробник займе стільки часу на виконання, що взаємодія з документом буде повільною і переривчастою.
+            </p>
+          </section>
+          <section>
+            <p>
+              Найбільш помітним прикладом для debouncing є функція автозавершення: ви просто хочете відправити запит на сервер, коли користувач перестав друкувати.
+            </p>
+          </section>
+          <section>
+            <pre><code class="javascript" data-trim contenteditable>
+function debounce(fn, delay) {
+  var timer = null;
+  return function () {
+    var context = this, args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fn.apply(context, args);
+    }, delay);
+  };
+}
+            </code></pre>
+          </section>
+          <section>
+            <p>Ще раз відкрийте консоль і введіть текст в обидва блоки</p>
+            <div class="debounce-example">
+              <p>
+                Without debouncing
+                <br>
+                <input type="text" class="no-debounce">
+              </p>
+              <p>
+                With debouncing
+                <br>
+                <input type="text" class="debounce">
+              </p>
+            </div>
+            <pre><code class="javascript" data-trim contenteditable>
+function input(event) {
+  var now = new Date();
+  console.log('Autocompletion request at ' + now);
+}
+
+document.querySelector('.no-debounce')
+  .addEventListener('input', input);
+
+document.querySelector('.debounce')
+  .addEventListener('input', debounce(input, 300));
+            </code></pre>
+            <script>
+              (function() {
+                function input(event) {
+                  var now = new Date();
+                  console.log('Autocompletion request at ' + now);
+                }
+
+                var root = document.querySelector('.debounce-example');
+
+                root.querySelector('.no-debounce')
+                  .addEventListener('input', input);
+
+                root.querySelector('.debounce')
+                  .addEventListener('input', debounce(input, 300));
+
+                // ---
+
+                function debounce(fn, delay) {
+                  var timer = null;
+                  return function () {
+                    var context = this, args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(function () {
+                      fn.apply(context, args);
+                    }, delay);
+                  };
+                }
+              })();
+            </script>
+          </section>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+    <script>
+      (function() {
+        function beforeUnload(event) {
+          return 'Do you really want to quit?';
+        }
+
+        Reveal.addEventListener('slidechanged', function(event) {
+          var hasClass = event.currentSlide.classList.contains('beforeunload');
+
+          if(hasClass) {
+            window.onbeforeunload = beforeUnload;
+          } else {
+            window.onbeforeunload = null;
+          }
+        });
+      })();
+    </script>
+
+  </body>
+</html>
